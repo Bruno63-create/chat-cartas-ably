@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Simple con Ably</title>
+  <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #mensajes { margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; }
+    input, button { padding: 10px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Intercambio en Tiempo Real</h1>
+  <form id="formulario">
+    <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." autocomplete="off" required />
+    <button type="submit">Enviar</button>
+  </form>
+
+  <h2>Mensajes del otro usuario:</h2>
+  <div id="mensajes"></div>
+
+  <script>
+    // Reemplaza esto con tu propia API Key de Ably
+    const ably = new Ably.Realtime('uy8u-A.02rvVw:ngiJYYDCz76bRPehULzgg5uXqxwMYkWp5aFjZjVe-pc');
+
+    const canal = ably.channels.get('chat-cartas');
+    const formulario = document.getElementById('formulario');
+    const input = document.getElementById('mensajeInput');
+    const mensajes = document.getElementById('mensajes');
+
+    // Escuchar mensajes entrantes
+    canal.subscribe('mensaje', function(msg) {
+      const nuevo = document.createElement('div');
+      nuevo.textContent = 'Otro usuario: ' + msg.data;
+      mensajes.appendChild(nuevo);
+    });
+
+    // Enviar mensaje
+    formulario.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const texto = input.value;
+      canal.publish('mensaje', texto);
+      const propio = document.createElement('div');
+      propio.textContent = 'Tú: ' + texto;
+      mensajes.appendChild(propio);
+      input.value = '';
+    });
+  </script>
+</body>
+</html>
